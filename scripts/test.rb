@@ -1,4 +1,9 @@
-require './sec.rb'
-include Sec
+def aaa(op={code: "aiueo"})
+  bbb(op)
+end
 
-p CHINACHU_URL
+def bbb(op={code: "aiueo"})
+  puts op[:code]
+end
+
+aaa({code: "bbbbb"})

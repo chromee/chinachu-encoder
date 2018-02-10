@@ -10,14 +10,14 @@ include Sec
 
 module ChinachuUtils
 
-  def execute(ts_path, anime)
+  def execute(ts_path, anime, option="acc")
     log_txt = File.expand_path("../../enc-log.txt", __FILE__)
     mp4_path = anime_path!(anime)
 
     File.open(log_txt, "a") do |f|
       start_time = DateTime.now
 
-      output, error = encode(ts_path, mp4_path)
+      output, error = encode(ts_path, mp4_path, option)
 
       end_time = DateTime.now
       diff = (end_time - start_time).to_i
@@ -33,10 +33,10 @@ module ChinachuUtils
     end
   end
 
-  def encode(ts_path, mp4_path)
+  def encode(ts_path, mp4_path, option)
     output = ""
     error = ""
-    cmd = "ffmpeg -y -i #{ts_path} -vcodec libx264 -acodec libfaac -tune animation #{mp4_path} 2>&1 | grep '^[^f]'"
+    cmd = "ffmpeg -y -i #{ts_path} -vcodec libx264 -acodec #{option} -tune animation #{mp4_path} 2>&1 | grep '^[^f]'"
     Open3.popen3(cmd) do |stdin, stdout, stderr, thread|
       stdout.each {|line| output << line }
       stderr.each {|line| error << line }

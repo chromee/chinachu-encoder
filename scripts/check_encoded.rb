@@ -16,7 +16,7 @@ end
 def bulk_encode()
   recorded_animes.each do |anime|
     next if encorded? anime
-    execute anime["recorded"], anime
+    execute anime["recorded"], anime, "libfaac"
   end
 end
 
