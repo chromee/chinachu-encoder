@@ -1,0 +1,2 @@
+# chinachu-encorder
+chinachuで録画したtsファイルをmp4に変換するスクリプト
