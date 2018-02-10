@@ -2,6 +2,11 @@ require 'date'
 require 'open3'
 require 'pathname'
 require 'fileutils'
+require 'open-uri'
+require 'net/http'
+require 'json'
+require './sec.rb'
+include Sec
 
 module ChinachuUtils
 
@@ -31,7 +36,7 @@ module ChinachuUtils
   def encode(ts_path, mp4_path)
     output = ""
     error = ""
-    cmd = "ffmpeg -y -i #{ts_path} -vcodec libx264 -acodec aac -tune animation #{mp4_path} 2>&1 | grep '^[^f]'"
+    cmd = "ffmpeg -y -i #{ts_path} -vcodec libx264 -acodec libfaac -tune animation #{mp4_path} 2>&1 | grep '^[^f]'"
     Open3.popen3(cmd) do |stdin, stdout, stderr, thread|
       stdout.each {|line| output << line }
       stderr.each {|line| error << line }
@@ -55,7 +60,7 @@ module ChinachuUtils
   # ディレクトリがなければ作成する
   def anime_path!(anime)
     dir = anime_dir(anime)
-    FileUtils.mkdir_p(anime_dir.to_s) unless Dir.exist?(anime_dir.to_s)
+    FileUtils.mkdir_p(dir.to_s) unless Dir.exist?(dir.to_s)
     title = safe_title(anime["title"])
     episode = anime["episode"] || parse_datetime(anime["start"])
     file_name = "#{title}_#{episode}話.mp4"
@@ -95,10 +100,16 @@ module ChinachuUtils
     return time.strftime("%Y%m%d")
   end
 
-  def file_count(dir)
-    dir = Dir.open(dir)
-    count = dir.to_a.reject  {|d| [".", ".."].include?(d) }.count
-    dir.close
-    return count
+  def recorded_animes
+    url = URI.parse("#{CHINACHU_URL}/api/recorded.json")
+    req = Net::HTTP::Get.new(url.path)
+    req.basic_auth USER, PASSWORD
+    res = Net::HTTP.new(url.host, url.port).start {|http| http.request(req) }
+    case res
+    when Net::HTTPSuccess, Net::HTTPRedirection
+      return result = JSON.parse(res.body)
+    else
+      res.value
+    end
   end
 end

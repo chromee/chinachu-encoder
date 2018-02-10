@@ -1,2 +1,4 @@
-puts ARGV[0]
-puts ARGV[1]
+require './sec.rb'
+include Sec
+
+p CHINACHU_URL
